@@ -179,8 +179,10 @@ class JudgeDispatcher(DispatcherBase):
                 self.submission.result = JudgeStatus.ACCEPTED
             elif self.problem.rule_type == ProblemRuleType.ACM or len(error_test_case) == len(resp["data"]):
                 self.submission.result = error_test_case[0]["result"]
+                # self.submission.gpt_message = self.sendMessageToGPT(code)
             else:
                 self.submission.result = JudgeStatus.PARTIALLY_ACCEPTED
+                # self.submission.gpt_message = self.sendMessageToGPT(code)
         self.submission.save()
 
         if self.contest_id:
@@ -401,3 +403,28 @@ class JudgeDispatcher(DispatcherBase):
             rank.total_score = rank.total_score + current_score
         rank.submission_info[problem_id] = current_score
         rank.save()
+
+    # 611177107 ADD: openai API
+    def sendMessageToGPT(self, code):
+        from openai import OpenAI
+        # My OpenAI API key
+        client = OpenAI(
+            # This is the default and can be omitted
+            api_key = "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"
+        )
+
+        chat_completion = client.chat.completions.create(
+            messages=[
+            {
+                "role": "system",
+                "content": "以下程式碼含有錯誤，請幫我修復他",
+            },
+            {
+                "role": "user",
+                "content": code,
+            }
+            ],
+            model="gpt-3.5-turbo",
+        )
+
+        return chat_completion.choices[0].message.content

@@ -14,6 +14,7 @@ from ..models import Submission
 from ..serializers import (CreateSubmissionSerializer, SubmissionModelSerializer,
                            ShareSubmissionSerializer)
 from ..serializers import SubmissionSafeModelSerializer, SubmissionListSerializer
+from judge import sendMessageToGPT
 
 
 class SubmissionAPI(APIView):
@@ -123,6 +124,27 @@ class SubmissionAPI(APIView):
         submission.shared = request.data["shared"]
         submission.save(update_fields=["shared"])
         return self.success()
+
+    def testGPT(self):
+        result = sendMessageToGPT('''
+            price = int(input())
+            number = input()
+            if price < 100:
+            print(price)
+            elif 100<= price < 500:
+            if number == ("SAVE20"):
+                print(price * 0.8)
+            elif number == ("SAVE30"):
+                print(price * 0.7)
+            else:
+                print(price)
+            elif price>=500:
+            if number == ("BIGSALE"):
+                print(price * 0.6)
+            else:
+                print(price * 0.8)
+        ''')
+        return self.success(result)
 
 
 class SubmissionListAPI(APIView):
