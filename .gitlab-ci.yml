@@ -1,0 +1,24 @@
+stages:
+  - build
+  - push
+
+build_image:
+  stage: build
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - docker build -t $DOCKER_USERNAME/fan_onlinejudge:$CI_COMMIT_REF_SLUG .
+  only:
+    - master
+
+push_image:
+  stage: push
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+    - docker push $DOCKER_USERNAME/fan_onlinejudge:$CI_COMMIT_REF_SLUG
+  only:
+    - master
