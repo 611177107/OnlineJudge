@@ -1,6 +1,15 @@
 stages:
+  - trigger-jenkins
   - build
   - push
+
+trigger-jenkins:
+  stage: trigger-jenkins
+  script:
+    - CRUMB=$(curl -u "$JENKINS_USER:$JENKINS_PASSWORD" "$JENKINS_URL/crumbIssuer/api/xml" | grep -oPm1 "(?<=<crumb>)[^<]+")
+    - curl -H "Jenkins-Crumb:$CRUMB" -X POST "$JENKINS_URL/job/codejudge/build?token=$JENKINS_JOB_TOKEN"
+  only:
+    - master
 
 build_image:
   stage: build
