@@ -14,10 +14,15 @@ from ..models import Submission
 from ..serializers import (CreateSubmissionSerializer, SubmissionModelSerializer,
                            ShareSubmissionSerializer)
 from ..serializers import SubmissionSafeModelSerializer, SubmissionListSerializer
-from judge import sendMessageToGPT
+# from judge import sendMessageToGPT
+from openai import OpenAI
+from django.conf import settings
 
 
 class SubmissionAPI(APIView):
+    # def submissionToGPT(self, data):
+        # result = sendMessageToGPT()
+
     def throttling(self, request):
         # 使用 open_api 的请求暂不做限制
         auth_method = getattr(request, "auth_method", "")
@@ -125,27 +130,6 @@ class SubmissionAPI(APIView):
         submission.save(update_fields=["shared"])
         return self.success()
 
-    def testGPT(self):
-        result = sendMessageToGPT('''
-            price = int(input())
-            number = input()
-            if price < 100:
-            print(price)
-            elif 100<= price < 500:
-            if number == ("SAVE20"):
-                print(price * 0.8)
-            elif number == ("SAVE30"):
-                print(price * 0.7)
-            else:
-                print(price)
-            elif price>=500:
-            if number == ("BIGSALE"):
-                print(price * 0.6)
-            else:
-                print(price * 0.8)
-        ''')
-        return self.success(result)
-
 
 class SubmissionListAPI(APIView):
     def get(self, request):
@@ -223,3 +207,62 @@ class SubmissionExistsAPI(APIView):
         return self.success(request.user.is_authenticated and
                             Submission.objects.filter(problem_id=request.GET["problem_id"],
                                                       user_id=request.user.id).exists())
+
+class SubmissionGPTAPI(APIView):
+    def post(self, request):
+        d = request
+        d = 0
+        d += 1
+        # return self.success("Succeeded")
+        #   result = sendMessageToGPT('''
+        #     price = int(input())
+        #     number = input()
+        #     if price < 100:
+        #     print(price)
+        #     elif 100<= price < 500:
+        #     if number == ("SAVE20"):
+        #         print(price * 0.8)
+        #     elif number == ("SAVE30"):
+        #         print(price * 0.7)
+        #     else:
+        #         print(price)
+        #     elif price>=500:
+        #     if number == ("BIGSALE"):
+        #         print(price * 0.6)
+        #     else:
+        #         print(price * 0.8)
+        # ''')
+
+        # result = "This code takes input for the price and a specific discount code. Based on the price and discount code entered, it calculates the final price after applying the discount."
+        result = self.sendMessageToGPT("hello, gpt. please tell me the time now in traditional chinese")
+        return self.success(result)
+    
+    def sendMessageToGPT(self, code):
+        # try:
+        #     return "test " + code
+        # except Exception as e:
+        #     return str(e)
+        try:
+            client = OpenAI(
+                # This is the default and can be omitted
+                # My OpenAI API key
+                api_key=settings.OPENAI_API_KEY
+            )
+
+            chat_completion = client.chat.completions.create(
+                messages=[
+                {
+                    "role": "system",
+                    "content": "以下程式碼含有錯誤，請幫我修復他",
+                },
+                {
+                    "role": "user",
+                    "content": code,
+                }
+                ],
+                model="gpt-3.5-turbo",
+            )
+
+            return chat_completion.choices[0].message.content
+        except Exception as e:
+            return str(e)

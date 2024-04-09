@@ -23,6 +23,9 @@ else:
 with open(os.path.join(DATA_DIR, "config", "secret.key"), "r") as f:
     SECRET_KEY = f.read()
 
+# 新增此行來取得 OpenAI API 金鑰
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Applications
