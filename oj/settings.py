@@ -54,6 +54,7 @@ LOCAL_APPS = [
     'submission',
     'options',
     'judge',
+    'repair_result',
 ]
 
 INSTALLED_APPS = VENDOR_APPS + LOCAL_APPS
@@ -165,12 +166,12 @@ LOGGING = {
    'loggers': {
        'django.request': {
            'handlers': LOGGING_HANDLERS,
-           'level': 'ERROR',
+           'level': 'DEBUG',
            'propagate': True,
        },
        'django.db.backends': {
            'handlers': LOGGING_HANDLERS,
-           'level': 'ERROR',
+           'level': 'DEBUG',
            'propagate': True,
        },
         'dramatiq': {

@@ -40,7 +40,8 @@ class Submission(models.Model):
     statistic_info = JSONField(default=dict)
     ip = models.TextField(null=True)
     # 611177107: GPT message from openAI
-    # gpt_message = models.TextField()
+    gpt_message = models.TextField(null=True)
+
 
     def check_user_permission(self, user, check_share=True):
         if self.user_id == user.id or user.is_super_admin() or user.can_mgmt_all_problem() or self.problem.created_by_id == user.id:
